@@ -22,10 +22,10 @@ class SibsController < ApplicationController
       merchant: {
         terminalId: ENV['TERMINAL_ID'].to_i,
         channel: "web",
-        merchantTransactionId: "OrderId - def32",
+        merchantTransactionId: "OrderId - def32a",
       },
       transaction: {
-        transactionTimestamp: DateTime.now.iso8601,
+        transactionTimestamp: DateTime.now, # DateTime.now.iso8601
         description: "Transaction test by SIBS",
         moto: false,
         paymentType: "PURS",
@@ -35,8 +35,8 @@ class SibsController < ApplicationController
         },
         paymentMethod: ["CARD", "MBWAY", "REFERENCE"],
         paymentReference: {
-          initialDatetime: DateTime.now.iso8601,
-          finalDatetime: (DateTime.now + 2).iso8601,
+          initialDatetime: DateTime.now,
+          finalDatetime: (DateTime.now + 2),
           maxAmount: {
             value: 5.5,
             currency: "EUR",
@@ -58,6 +58,7 @@ class SibsController < ApplicationController
       'X-IBM-Client-Id' => ENV['SIBS_CLIENT_ID'] || "",
       'Content-Type' => 'application/json'
     })
+    request.body = body
 
     response = http.request(request)
     data = JSON.parse(response.body)
@@ -69,7 +70,7 @@ class SibsController < ApplicationController
     id = params[:id]
     return if id.nil?
 
-    uri = URI.parse("#{SibsPaymentUrl}/#{id}/status")
+    uri = URI.parse("#{ENV['SIBS_URL']}/#{id}/status")
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     request = Net::HTTP::Get.new(uri.request_uri, {
